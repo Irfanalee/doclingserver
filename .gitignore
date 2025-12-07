@@ -1,1 +1,38 @@
+# Virtual environments
 venv/
+env/
+.venv/
+ENV/
+
+# Python artifacts
+__pycache__/
+*.py[cod]
+*.so
+.Python
+pip-log.txt
+*.egg-info/
+dist/
+build/
+
+# Environment files
+.env
+.env.local
+
+# Application data
+data/
+output/
+temp/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+
+# Docker
+docker-compose.override.yml
+
+# Plan files
+Plan/

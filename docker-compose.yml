@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: docling-server:local
+    container_name: docling-api
+    ports:
+      - "8000:8000"
+    environment:
+      - HOST=0.0.0.0
+      - PORT=8000
+      - WORKERS=1
+      - LOG_LEVEL=INFO
+      - OUTPUT_DIR=/app/data/output
+      - TEMP_DIR=/app/data/temp
+      - DOCLING_CACHE_DIR=/app/.docling
+      - MAX_FILE_SIZE_MB=100
+      - CORS_ORIGINS=*
+    volumes:
+      # Mount local directories for development
+      - ./data:/app/data/input:ro          # Input PDFs (read-only)
+      - ./output:/app/data/output          # Results (read-write)
+      - docling-cache:/app/.docling        # Model cache (persistent)
+
+      # Uncomment for hot-reload development:
+      # - ./api_server.py:/app/api_server.py
+      # - ./document_analyzer.py:/app/document_analyzer.py
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+    # Resource limits (adjust based on your machine)
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 4G
+        reservations:
+          cpus: '1'
+          memory: 2G
+
+volumes:
+  docling-cache:
+    driver: local

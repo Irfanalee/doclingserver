@@ -6,8 +6,9 @@ import fitz  # PyMuPDF
 
 
 class DocumentAnalyzer:
-    def __init__(self, pdf_path: str):
+    def __init__(self, pdf_path: str, output_dir: Path = Path("output")):
         self.pdf_path = pdf_path
+        self.output_dir = output_dir
         self.converter = DocumentConverter()
         self.result = None
         self.doc = None
@@ -53,12 +54,11 @@ class DocumentAnalyzer:
         if self.doc is None:
             raise ValueError("Document not converted yet. Call analyze() first.")
 
-        output_dir = Path("output")
-        output_dir.mkdir(exist_ok=True)
+        self.output_dir.mkdir(parents=True, exist_ok=True)
 
         for i, table in enumerate(self.doc.tables):
             df = table.export_to_dataframe()
-            csv_path = output_dir / f"{Path(self.pdf_path).stem}_table_{i+1}.csv"
+            csv_path = self.output_dir / f"{Path(self.pdf_path).stem}_table_{i+1}.csv"
             df.to_csv(csv_path, index=False)
             print(f"Table {i+1} saved to: {csv_path}")
 
@@ -67,25 +67,23 @@ class DocumentAnalyzer:
         if self.result is None:
             raise ValueError("Document not converted yet. Call analyze() first.")
 
-        output_dir = Path("output")
-        output_dir.mkdir(exist_ok=True)
+        self.output_dir.mkdir(parents=True, exist_ok=True)
 
         markdown = self.result.document.export_to_markdown()
-        markdown_path = output_dir / f"{Path(self.pdf_path).stem}.md"
+        markdown_path = self.output_dir / f"{Path(self.pdf_path).stem}.md"
         with open(markdown_path, 'w', encoding='utf-8') as f:
             f.write(markdown)
         print(f"Markdown saved to: {markdown_path}")
     
     def _create_summary_report(self, stats):
         """ Create and save a summary report as JSON. """
-        output_dir = Path("output")
-        output_dir.mkdir(exist_ok=True)
+        self.output_dir.mkdir(parents=True, exist_ok=True)
 
         report = {
             "Analysis Date": datetime.now().isoformat(),
             "Document Statistics": stats
         }
-        report_path = output_dir / f"{Path(self.pdf_path).stem}_summary.json"
+        report_path = self.output_dir / f"{Path(self.pdf_path).stem}_summary.json"
         with open(report_path, 'w', encoding='utf-8') as f:
             json.dump(report, f, indent=4)
         print(f"Summary report saved to: {report_path}")
@@ -96,10 +94,9 @@ class DocumentAnalyzer:
             raise ValueError("Document not converted yet. Call analyze() first.")
 
         # Create images directory in output folder
-        output_dir = Path("output")
-        output_dir.mkdir(exist_ok=True)
-        images_dir = output_dir / f"{Path(self.pdf_path).stem}_images"
-        images_dir.mkdir(exist_ok=True)
+        self.output_dir.mkdir(parents=True, exist_ok=True)
+        images_dir = self.output_dir / f"{Path(self.pdf_path).stem}_images"
+        images_dir.mkdir(parents=True, exist_ok=True)
 
         saved_count = 0
         print("\nExtracting images...")
